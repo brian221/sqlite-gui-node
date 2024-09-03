@@ -18,6 +18,7 @@ const path_1 = __importDefault(require("path"));
 const databaseFunctions_1 = __importDefault(require("./Utils/databaseFunctions"));
 const logger_1 = __importDefault(require("./Utils/logger"));
 const tables_1 = __importDefault(require("./routes/tables"));
+const express_basic_auth_1 = __importDefault(require("express-basic-auth"));
 const app = (0, express_1.default)();
 app.set("view engine", "ejs");
 app.set("views", path_1.default.join(__dirname, "../views"));
@@ -44,8 +45,11 @@ app.get("/edit/:table/:label/:id", (req, res) => {
     res.render("edit", { tableName, id });
 });
 function SqliteGuiNode(db_1) {
-    return __awaiter(this, arguments, void 0, function* (db, port = 8080) {
+    return __awaiter(this, arguments, void 0, function* (db, port = 8080, basicAuth) {
         yield databaseFunctions_1.default.InitializeDB(db);
+        if (basicAuth) {
+            app.use((0, express_basic_auth_1.default)(basicAuth));
+        }
         app.use("/api/tables", (0, tables_1.default)(db));
         app.listen(port, () => {
             logger_1.default.info(`SQLite Web Admin Tool running at http://localhost:${port}`);
