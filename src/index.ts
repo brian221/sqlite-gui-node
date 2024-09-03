@@ -5,6 +5,7 @@ import databaseFunctions from "./Utils/databaseFunctions";
 import logger from "./Utils/logger";
 import tableRoutes from "./routes/tables";
 import * as sqlite3 from "sqlite3"; // Assuming you're using sqlite3
+import basicAuthMiddleware from "express-basic-auth";
 
 const app = express();
 
@@ -39,8 +40,11 @@ app.get("/edit/:table/:label/:id", (req, res) => {
   res.render("edit", { tableName, id });
 });
 
-async function SqliteGuiNode(db: sqlite3.Database, port = 8080) {
+async function SqliteGuiNode(db: sqlite3.Database, port = 8080, basicAuth: any) {
   await databaseFunctions.InitializeDB(db);
+  if (basicAuth) {
+    app.use(basicAuthMiddleware(basicAuth))
+  }
   app.use("/api/tables", tableRoutes(db));
   app.listen(port, () => {
     logger.info(`SQLite Web Admin Tool running at http://localhost:${port}`);
